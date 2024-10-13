@@ -15,7 +15,7 @@ var (
 	applicationPort = "5151"                  // Default value for local development
 	serviceName     = "KONTEST-EMAIL-SERVICE" // Service name for Service Registry
 	consulHost      = "localhost"             // Default value for local development
-	consulPort      = 5157                    // Port as a constant (can be constant if it won't change)
+	consulPort      = 5150                    // Port as a constant (can be constant if it won't change)
 )
 
 func initializeVariables() {
@@ -50,19 +50,19 @@ func main() {
 		log.Fatalf("Failed to convert applicationPort to integer: %v", err)
 	}
 
-	// Load config
-	config := utils.GetConfig()
+	// Load kafkaConfig
+	kafkaConfig := utils.GetKafkaConfig()
 
 	consulService := consulServiceManager.NewConsulService(consulHost, consulPort)
 	consulService.Start(applicationHost, portInt, serviceName)
 
 	// Load Kafka configuration
-	broker := config.KafkaHost + ":" + config.KafkaPort
+	broker := kafkaConfig.KafkaHost + ":" + kafkaConfig.KafkaPort
 
 	// Initialize the EmailService and KafkaMessageListener
 	emailService := &service.MailJetEmailService{}
 	listener := consumer.NewKafkaMessageListener(emailService)
 
 	// Start consuming messages
-	listener.ConsumeMessages(config.Topics, "kontest-email-service", broker)
+	listener.ConsumeMessages(kafkaConfig.Topics, "kontest-email-service", broker)
 }

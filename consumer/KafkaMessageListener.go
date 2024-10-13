@@ -10,7 +10,7 @@ import (
 
 type KafkaMessageListener struct {
 	emailService service.EmailService
-	config       *utils.Config
+	config       *utils.KafkaConfig
 }
 
 // NewKafkaMessageListener creates a new KafkaMessageListener with the provided email service

@@ -5,25 +5,25 @@ import (
 	"sync"
 )
 
-type Config struct {
+type KafkaConfig struct {
 	KafkaHost string
 	KafkaPort string
 	Topics    []string
 }
 
 var (
-	instance *Config
+	instance *KafkaConfig
 	once     sync.Once
 )
 
-func GetConfig() *Config {
+func GetKafkaConfig() *KafkaConfig {
 	once.Do(func() {
 		instance = loadConfig()
 	})
 	return instance
 }
 
-func loadConfig() *Config {
+func loadConfig() *KafkaConfig {
 	// Load Kafka host and port
 	kafkaHost := os.Getenv("KAFKA_HOST")
 	if kafkaHost == "" {
@@ -43,7 +43,7 @@ func loadConfig() *Config {
 		loadKafkaTopic(PasswordChangeEmailEventTopic),
 	}
 
-	return &Config{
+	return &KafkaConfig{
 		KafkaHost: kafkaHost,
 		KafkaPort: kafkaPort,
 		Topics:    topics,
