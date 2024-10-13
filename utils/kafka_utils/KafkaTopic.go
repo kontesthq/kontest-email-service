@@ -1,4 +1,4 @@
-package utils
+package kafka_utils
 
 type KafkaTopic struct {
 	envVarName   string

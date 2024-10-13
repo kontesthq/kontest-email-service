@@ -4,7 +4,7 @@ import (
 	consulServiceManager "github.com/ayushs-2k4/go-consul-service-manager"
 	"kontest-email-service/consumer"
 	"kontest-email-service/service"
-	"kontest-email-service/utils"
+	"kontest-email-service/utils/kafka_utils"
 	"log"
 	"os"
 	"strconv"
@@ -51,12 +51,12 @@ func main() {
 	}
 
 	// Load kafkaConfig
-	kafkaConfig := utils.GetKafkaConfig()
+	kafkaConfig := kafka_utils.GetKafkaConfig()
 
 	consulService := consulServiceManager.NewConsulService(consulHost, consulPort)
 	consulService.Start(applicationHost, portInt, serviceName)
 
-	// Load Kafka configuration
+	// Load kafka_utils configuration
 	broker := kafkaConfig.KafkaHost + ":" + kafkaConfig.KafkaPort
 
 	// Initialize the EmailService and KafkaMessageListener

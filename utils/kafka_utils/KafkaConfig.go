@@ -1,4 +1,4 @@
-package utils
+package kafka_utils
 
 import (
 	"os"
@@ -24,7 +24,7 @@ func GetKafkaConfig() *KafkaConfig {
 }
 
 func loadConfig() *KafkaConfig {
-	// Load Kafka host and port
+	// Load kafka_utils host and port
 	kafkaHost := os.Getenv("KAFKA_HOST")
 	if kafkaHost == "" {
 		kafkaHost = "localhost"
@@ -35,7 +35,7 @@ func loadConfig() *KafkaConfig {
 		kafkaPort = "9092"
 	}
 
-	// Load Kafka Topics from environment variables or use default values
+	// Load kafka_utils Topics from environment variables or use default values
 	topics := []string{
 		loadKafkaTopic(UserRegistrationEventTopic),
 		loadKafkaTopic(AccountDeletionEventTopic),

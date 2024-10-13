@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"kontest-email-service/service"
-	"kontest-email-service/utils"
+	"kontest-email-service/utils/kafka_utils"
 	"log"
 )
 
 type KafkaMessageListener struct {
 	emailService service.EmailService
-	config       *utils.KafkaConfig
+	config       *kafka_utils.KafkaConfig
 }
 
 // NewKafkaMessageListener creates a new KafkaMessageListener with the provided email service
@@ -20,7 +20,7 @@ func NewKafkaMessageListener(emailService service.EmailService) *KafkaMessageLis
 	}
 }
 
-// ConsumeMessages listens for messages on the specified Kafka topics and dispatches to appropriate handlers
+// ConsumeMessages listens for messages on the specified kafka_utils topics and dispatches to appropriate handlers
 func (l *KafkaMessageListener) ConsumeMessages(topics []string, groupId string, broker string) {
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": broker,
@@ -76,16 +76,16 @@ func (l *KafkaMessageListener) ConsumeMessages(topics []string, groupId string, 
 // processMessage determines the topic and calls the appropriate handler function
 func (l *KafkaMessageListener) processMessage(message string, topic string) {
 	switch topic {
-	case utils.UserRegistrationEventTopic.DefaultValue:
+	case kafka_utils.UserRegistrationEventTopic.DefaultValue:
 		l.handleUserRegistrationMessage(message)
 
-	case utils.AccountDeletionEventTopic.DefaultValue:
+	case kafka_utils.AccountDeletionEventTopic.DefaultValue:
 		log.Printf("Received message for Account Deletion Event Topic, but no action is defined.")
 
-	case utils.AccountDeletionEmailEventTopic.DefaultValue:
+	case kafka_utils.AccountDeletionEmailEventTopic.DefaultValue:
 		l.handleAccountDeletionMessage(message)
 
-	case utils.PasswordChangeEmailEventTopic.DefaultValue:
+	case kafka_utils.PasswordChangeEmailEventTopic.DefaultValue:
 		l.handlePasswordChangeMessage(message)
 	}
 }
