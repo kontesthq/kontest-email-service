@@ -1,7 +1,7 @@
 package main
 
 import (
-	consulServiceManager "github.com/ayushs-2k4/go-consul-service-manager"
+	consulServiceManager "github.com/ayushs-2k4/go-consul-service-manager/consulservicemanager"
 	"kontest-email-service/consumer"
 	"kontest-email-service/service"
 	"kontest-email-service/utils/kafka_utils"
@@ -12,21 +12,33 @@ import (
 
 var (
 	applicationHost = "localhost"             // Default value for local development
-	applicationPort = "5151"                  // Default value for local development
+	applicationPort = 5151                    // Default value for local development
 	serviceName     = "KONTEST-EMAIL-SERVICE" // Service name for Service Registry
 	consulHost      = "localhost"             // Default value for local development
 	consulPort      = 5150                    // Port as a constant (can be constant if it won't change)
 )
 
 func initializeVariables() {
+	// Get the hostname of the machine
+	hostname, err := os.Hostname()
+	if err != nil {
+		log.Fatalf("Error fetching hostname: %v", err)
+	}
+
 	// Attempt to read the KONTEST_API_SERVER_HOST environment variable
 	if host := os.Getenv("KONTEST_EMAIL_SERVICE_HOST"); host != "" {
 		applicationHost = host // Override with the environment variable if set
+	} else {
+		applicationHost = hostname // Use the machine's hostname if the env var is not set
 	}
 
 	// Attempt to read the KONTEST_API_SERVER_PORT environment variable
 	if port := os.Getenv("KONTEST_EMAIL_SERVICE_PORT"); port != "" {
-		applicationPort = port // Override with the environment variable if set
+		parsedPort, err := strconv.Atoi(port)
+		if err != nil {
+			log.Fatalf("Invalid port value: %v", err)
+		}
+		applicationPort = parsedPort // Override with the environment variable if set
 	}
 
 	// Attempt to read the CONSUL_ADDRESS environment variable
@@ -45,16 +57,11 @@ func initializeVariables() {
 func main() {
 	initializeVariables()
 
-	portInt, err := strconv.Atoi(applicationPort)
-	if err != nil {
-		log.Fatalf("Failed to convert applicationPort to integer: %v", err)
-	}
-
 	// Load kafkaConfig
 	kafkaConfig := kafka_utils.GetKafkaConfig()
 
 	consulService := consulServiceManager.NewConsulService(consulHost, consulPort)
-	consulService.Start(applicationHost, portInt, serviceName)
+	consulService.Start(applicationHost, applicationPort, serviceName, []string{})
 
 	// Load kafka_utils configuration
 	broker := kafkaConfig.KafkaHost + ":" + kafkaConfig.KafkaPort
