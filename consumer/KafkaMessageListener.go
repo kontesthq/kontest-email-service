@@ -53,26 +53,6 @@ func (l *KafkaMessageListener) ConsumeMessages(topics []string, groupId string, 
 	}
 }
 
-//// processMessage determines the topic and calls the appropriate handler function
-//func (l *KafkaMessageListener) processMessage(message string, topic string) {
-//	switch utils.KafkaTopic(topic) {
-//	case utils.UserRegistrationEventTopic.:
-//		l.handleUserRegistrationMessage(message)
-//
-//	case utils.AccountDeletionEventTopic:
-//		log.Printf("Received message for Account Deletion Event Topic, but no action is defined.")
-//
-//	case utils.AccountDeletionEmailEventTopic:
-//		l.handleAccountDeletionMessage(message)
-//
-//	case utils.PasswordChangeEmailEventTopic:
-//		l.handlePasswordChangeMessage(message)
-//
-//	default:
-//		log.Printf("Unknown topic: %s", topic)
-//	}
-//}
-
 // processMessage determines the topic and calls the appropriate handler function
 func (l *KafkaMessageListener) processMessage(message string, topic string) {
 	switch topic {
@@ -87,6 +67,9 @@ func (l *KafkaMessageListener) processMessage(message string, topic string) {
 
 	case kafka_utils.PasswordChangeEmailEventTopic.DefaultValue:
 		l.handlePasswordChangeMessage(message)
+
+	case kafka_utils.LoginOTTEmailEventTopic.DefaultValue:
+		l.handleLoginOTTMessage(message)
 	}
 }
 
@@ -148,4 +131,28 @@ func (l *KafkaMessageListener) handlePasswordChangeMessage(message string) {
 	updateDate, _ := jsonData["updateDate"].(string)
 	l.emailService.SendEmail(email, "Password Changed", "Your account password has been changed! If you did not make this change, please contact us immediately.")
 	log.Printf("Processed password change message for email: %s, update date: %s", email, updateDate)
+}
+
+func (l *KafkaMessageListener) handleLoginOTTMessage(message string) {
+	var jsonData map[string]interface{}
+	err := json.Unmarshal([]byte(message), &jsonData)
+	if err != nil {
+		log.Printf("Failed to parse login OTT message: %v", err)
+		return
+	}
+
+	email, ok := jsonData["email"].(string)
+	if !ok {
+		log.Printf("Invalid email in login OTT message: %s", message)
+		return
+	}
+
+	ott, ok := jsonData["ott"].(string)
+	if !ok {
+		log.Printf("Invalid ott in login OTT message: %s", message)
+		return
+	}
+
+	l.emailService.SendEmail(email, "One Time Token", "Your one time token is: "+ott)
+	log.Printf("Processed login OTT message for email: %s", email)
 }
