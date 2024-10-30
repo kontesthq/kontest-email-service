@@ -6,6 +6,7 @@ import (
 	"kontest-email-service/service"
 	"kontest-email-service/utils/kafka_utils"
 	"log"
+	"log/slog"
 )
 
 type KafkaMessageListener struct {
@@ -89,7 +90,7 @@ func (l *KafkaMessageListener) handleUserRegistrationMessage(message string) {
 	}
 
 	registrationDate, _ := jsonData["registrationDate"].(string)
-	l.emailService.SendEmail(email, "Welcome to Kontest", "Thank you for registering with us!")
+	l.sendEmail(email, "Welcome to Kontest", "Thank you for registering with us!")
 	log.Printf("Processed user registration message for email: %s, registration date: %s", email, registrationDate)
 }
 
@@ -109,7 +110,7 @@ func (l *KafkaMessageListener) handleAccountDeletionMessage(message string) {
 	}
 
 	deletionDate, _ := jsonData["deletionDate"].(string)
-	l.emailService.SendEmail(email, "Account Deletion", "Your account has been deleted!")
+	l.sendEmail(email, "Account Deletion", "Your account has been deleted!")
 	log.Printf("Processed account deletion message for email: %s, deletion date: %s", email, deletionDate)
 }
 
@@ -129,7 +130,7 @@ func (l *KafkaMessageListener) handlePasswordChangeMessage(message string) {
 	}
 
 	updateDate, _ := jsonData["updateDate"].(string)
-	l.emailService.SendEmail(email, "Password Changed", "Your account password has been changed! If you did not make this change, please contact us immediately.")
+	l.sendEmail(email, "Password Changed", "Your account password has been changed! If you did not make this change, please contact us immediately.")
 	log.Printf("Processed password change message for email: %s, update date: %s", email, updateDate)
 }
 
@@ -153,6 +154,14 @@ func (l *KafkaMessageListener) handleLoginOTTMessage(message string) {
 		return
 	}
 
-	l.emailService.SendEmail(email, "One Time Token", "Your one time token is: "+ott)
+	l.sendEmail(email, "One Time Token", "Your one time token is: "+ott)
 	log.Printf("Processed login OTT message for email: %s", email)
+}
+
+func (l *KafkaMessageListener) sendEmail(email, subject, body string) {
+	err := l.emailService.SendEmail(email, subject, body)
+	if err != nil {
+		slog.Error("Failed to send email: %v", err)
+		return
+	}
 }

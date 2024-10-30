@@ -67,7 +67,7 @@ func main() {
 	broker := kafkaConfig.KafkaHost + ":" + kafkaConfig.KafkaPort
 
 	// Initialize the EmailService and KafkaMessageListener
-	emailService := &service.MailJetEmailService{}
+	emailService := service.NewMailJetEmailService()
 	listener := consumer.NewKafkaMessageListener(emailService)
 
 	// Start consuming messages
