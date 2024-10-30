@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/mailjet/mailjet-apiv3-go/v3"
 	"log/slog"
+	"os"
 )
 
 // MailJetEmailService is an implementation of EmailService
@@ -12,7 +13,7 @@ type MailJetEmailService struct {
 
 // NewMailJetEmailService initializes and returns a new MailJetEmailService.
 func NewMailJetEmailService() *MailJetEmailService {
-	client := mailjet.NewMailjetClient("bfdda4623b8845dd83d1cf0a7b874713", "d60cddf038658d23fa21d25e481c4dcb")
+	client := mailjet.NewMailjetClient(os.Getenv("MJ_APIKEY_PUBLIC"), os.Getenv("MJ_APIKEY_PRIVATE"))
 	return &MailJetEmailService{client: client}
 }
 
